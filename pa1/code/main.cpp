@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 
 constexpr double MY_PI = 3.1415926;
+using Eigen::Matrix4f;
 
 Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
 {
@@ -23,10 +24,15 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
     Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
 
-    // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
 
+    float cos_theta = cos(MY_PI * rotation_angle / 180);
+    float sin_theta = sin(MY_PI * rotation_angle / 180);
+    model.row(0) << cos_theta, -sin_theta, 0, 0;
+    model.row(1) << sin_theta, cos_theta,0 ,0;
+    model.row(2) << 0, 0, 1, 0;
+    model.row(3) << 0, 0, 0, 1;
     return model;
 }
 
@@ -37,10 +43,30 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
 
     Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
 
-    // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
-
+    float halfV = eye_fov * MY_PI / 180 / 2;
+    float t = tan(halfV) * zNear;
+    float b = -t;
+    float r = aspect_ratio * t;
+    float l = -r;
+    float n = zNear,f = zFar;
+    Matrix4f MorthoL,MorthoR,Mortho;
+    MorthoL << 2/(r - l), 0, 0, 0,
+                0, 2/(t - b), 0, 0,
+                0, 0, 2/(n - f), 0,
+                0, 0, 0, 1;
+    MorthoR << 1, 0, 0, -(l+r)/2,
+                0, 1, 0, -(b+t)/2,
+                0, 0, 1, -(f+n)/2,
+                0, 0, 0, 1;
+    Mortho = MorthoL * MorthoR;
+    Matrix4f Mpersp2ortho;
+    Mpersp2ortho << n, 0, 0, 0,
+                    0, n, 0, 0,
+                    0, 0, n+f, -n*f,
+                    0, 0, 1, 0;
+    projection = Mortho * Mpersp2ortho;
     return projection;
 }
 
