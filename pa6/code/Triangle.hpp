@@ -65,8 +65,8 @@ public:
                               Vector3f& N, Vector2f& st) const override
     {
         N = normal;
-        //        throw std::runtime_error("triangle::getSurfaceProperties not
-        //        implemented.");
+//                throw std::runtime_error("triangle::getSurfaceProperties not
+//                implemented.");
     }
     Vector3f evalDiffuseColor(const Vector2f&) const override;
     Bounds3 getBounds() override;
@@ -231,11 +231,13 @@ inline Intersection Triangle::getIntersection(Ray ray)
         return inter;
     t_tmp = dotProduct(e2, qvec) * det_inv;
 
-    // TODO find ray triangle intersection
-
-
-
-
+    //find ray triangle intersection
+    inter.happened = true;
+    inter.distance = t_tmp;
+    inter.m = m;//Material;
+    inter.obj = this;
+    inter.normal = normal;
+    inter.coords = ray(t_tmp);
     return inter;
 }
 
